@@ -12,13 +12,49 @@ Browse the directories below to find repositories related to specific AI applica
 
 ## Categories
 
-- [AI-Driven Web Apps](#ai-driven-web-apps)
-- [AI-Powered Mobile Apps](#ai-powered-mobile-apps)
-- [AI-Enhanced Productivity Tools](#ai-enhanced-productivity-tools)
-- [AI for Creative Content Generation](#ai-for-creative-content-generation)
-- [AI in Business Automation](#ai-in-business-automation)
-- [AI in Healthcare and Wellness](#ai-in-healthcare-and-wellness)
-- [More categories to come...]
+### 📈 Trending Now (Auto-Updated)
+
+- **[GitHub Trending Tech](./github_trending_tech/)** - *Daily updated* cutting-edge repos gaining rapid traction. Filter by language and time period.
+
+### 🏆 Established Projects (2000+ Stars)
+
+- **[AI-Driven Web Apps](./ai_driven_web_apps/)** - Web applications powered by AI
+- **[AI-Powered Mobile Apps](./ai_powered_mobile_apps/)** - Mobile applications with AI features
+- **[AI-Enhanced Productivity Tools](./ai_enhanced_productivity_tools/)** - Tools to boost productivity with AI
+- **[AI for Creative Content Generation](./)** - Coming soon
+- **[AI in Business Automation](./)** - Coming soon
+- **[AI in Healthcare and Wellness](./)** - Coming soon
+
+---
+
+## 🤖 Automation
+
+### GitHub Trending Scraper
+
+This project includes an automated scraper that monitors [GitHub Trending](https://github.com/trending) daily to identify emerging technologies and hot repositories.
+
+**Features:**
+- ✅ Daily scraping at 6:00 AM EST
+- ✅ Multi-language support (Python, JavaScript, Rust, Go, etc.)
+- ✅ Period filters (today/week/month)
+- ✅ Automatic README updates
+- ✅ Weekly archive generation
+
+**Quick Start:**
+```bash
+# Install dependencies
+pip install -r scripts/requirements.txt
+
+# Run manual scrape
+python scripts/github_trending_scraper.py
+
+# Set up automated scraping (cron)
+crontab scripts/cron_jobs.example
+```
+
+**Documentation:** [scripts/trending_scraper.md](./scripts/trending_scraper.md)
+
+---
 
 ## Contribution Guidelines
 
