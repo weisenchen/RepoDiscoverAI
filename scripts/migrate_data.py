@@ -18,7 +18,8 @@ from datetime import datetime
 SCRIPT_DIR = Path(__file__).parent
 PROJECT_ROOT = SCRIPT_DIR.parent
 LEGACY_DATA_DIR = PROJECT_ROOT / "legacy_backup" / "data"
-DB_PATH = PROJECT_ROOT / "data" / "repos.db"
+DATA_DIR = PROJECT_ROOT / "data"
+DB_PATH = DATA_DIR / "repos.db"
 
 
 async def migrate():
@@ -28,13 +29,20 @@ async def migrate():
         print("   Run: docker-compose up -d")
         return
     
-    if not LEGACY_DATA_DIR.exists():
-        print("⚠️  Legacy data directory not found.")
-        print(f"   Expected: {LEGACY_DATA_DIR}")
-        return
+    # Find all JSON files from both legacy and current data directories
+    json_files = []
     
-    # Find all JSON files
-    json_files = list(LEGACY_DATA_DIR.glob("*.json"))
+    if LEGACY_DATA_DIR.exists():
+        json_files.extend(list(LEGACY_DATA_DIR.glob("*.json")))
+    
+    if DATA_DIR.exists():
+        # Exclude the database file and only get JSON files
+        json_files.extend([f for f in DATA_DIR.glob("*.json") if f not in json_files])
+    
+    if not json_files:
+        print("⚠️  No JSON files found.")
+        print(f"   Checked: {LEGACY_DATA_DIR} and {DATA_DIR}")
+        return
     
     if not json_files:
         print("⚠️  No JSON files found in legacy data directory.")

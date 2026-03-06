@@ -1,6 +1,6 @@
 # GitHub Trending Tech Trends 📈
 
-**Last Updated:** 2026-03-01  
+**Last Updated:** 2026-03-05  
 **Update Frequency:** Daily (automated)
 
 This category tracks the hottest repositories and technology trends on GitHub right now. Unlike our other categories that focus on established projects (2000+ stars), here you'll find cutting-edge libraries and frameworks gaining rapid traction.
@@ -12,16 +12,20 @@ This category tracks the hottest repositories and technology trends on GitHub ri
 *Auto-updated daily from [GitHub Trending](https://github.com/trending)*
 
 | Repo | Stars | Forks | Language | Description |
-| [wifi-densepose](<https://github.com/ruvnet/wifi-densepose>) | 12,457 | 1,227 | Rust | ... |
-| [airi](<https://github.com/moeru-ai/airi>) | 19,471 | 1,855 | TypeScript | ... |
-| [claude-code](<https://github.com/anthropics/claude-code>) | 71,950 | 5,694 | Shell | ... |
-| [xz](<https://github.com/tukaani-project/xz>) | 1,244 | 211 | C | ... |
-| [awesome-llm-apps](<https://github.com/Shubhamsaboo/awesome-llm-apps>) | 98,323 | 14,308 | Python | ... |
-| [ruflo](<https://github.com/ruvnet/ruflo>) | 16,667 | 1,887 | TypeScript | ... |
-| [deer-flow](<https://github.com/bytedance/deer-flow>) | 22,681 | 2,725 | Python | ... |
-| [claude-relay-service](<https://github.com/Wei-Shaw/claude-relay-service>) | 8,710 | 1,387 | JavaScript | ... |
-| [hermes-agent](<https://github.com/NousResearch/hermes-agent>) | 1,177 | 175 | Python | ... |
-| [superset](<https://github.com/superset-sh/superset>) | 2,506 | 185 | TypeScript | ... |
+| [shannon](<https://github.com/KeygraphHQ/shannon>) | 31,902 | 3,176 | TypeScript | ... |
+| [airi](<https://github.com/moeru-ai/airi>) | 27,840 | 2,614 | TypeScript | ... |
+| [codebuff](<https://github.com/CodebuffAI/codebuff>) | 3,900 | 457 | TypeScript | ... |
+| [Perplexica](<https://github.com/ItzCrazyKns/Perplexica>) | 31,336 | 3,327 | TypeScript | ... |
+| [drawio-mcp-server](<https://github.com/lgazo/drawio-mcp-server>) | 880 | 78 | TypeScript | ... |
+| [Flowise](<https://github.com/FlowiseAI/Flowise>) | 50,408 | 23,875 | TypeScript | ... |
+| [superset](<https://github.com/superset-sh/superset>) | 5,093 | 314 | TypeScript | ... |
+| [openclaw](<https://github.com/openclaw/openclaw>) | 266,493 | 50,984 | TypeScript | ... |
+| [hoppscotch](<https://github.com/hoppscotch/hoppscotch>) | 78,168 | 5,618 | TypeScript | ... |
+| [vscode](<https://github.com/microsoft/vscode>) | 182,327 | 38,309 | TypeScript | ... |
+
+
+
+
 
 
 ---
