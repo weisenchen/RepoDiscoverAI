@@ -16,62 +16,109 @@ router = APIRouter()
 PATHS_DIR = Path(__file__).parent.parent.parent / "collections" / "learning-paths"
 
 
-# Default learning paths (will be populated with markdown files)
-DEFAULT_PATHS = {
+# Learning paths metadata (parsed from markdown files)
+# Format: path_id -> metadata
+PATHS_METADATA = {
     "ai-developer": {
-        "id": "ai-developer",
         "title": "AI Developer",
         "description": "Learn to build AI-powered applications",
         "duration": "6-12 months",
-        "stages": [
-            {"name": "Python Basics", "projects": 3},
-            {"name": "ML Fundamentals", "projects": 5},
-            {"name": "Deep Learning", "projects": 5},
-            {"name": "LLM Applications", "projects": 5}
-        ]
+        "difficulty": "Intermediate"
     },
     "web-developer": {
-        "id": "web-developer",
-        "title": "Web Developer",
+        "title": "Web Developer", 
         "description": "Full-stack web development path",
         "duration": "6-9 months",
-        "stages": [
-            {"name": "HTML/CSS/JS", "projects": 5},
-            {"name": "Frontend Framework", "projects": 5},
-            {"name": "Backend Development", "projects": 5},
-            {"name": "Deployment & DevOps", "projects": 3}
-        ]
+        "difficulty": "Beginner"
     },
     "data-scientist": {
-        "id": "data-scientist",
         "title": "Data Scientist",
         "description": "Data analysis and machine learning",
         "duration": "9-12 months",
-        "stages": [
-            {"name": "Python & Statistics", "projects": 4},
-            {"name": "Data Visualization", "projects": 4},
-            {"name": "Machine Learning", "projects": 6},
-            {"name": "Deep Learning", "projects": 4}
-        ]
+        "difficulty": "Intermediate"
+    },
+    "devops-engineer": {
+        "title": "DevOps Engineer",
+        "description": "Cloud infrastructure and automation",
+        "duration": "8-12 months",
+        "difficulty": "Advanced"
+    },
+    "mobile-developer": {
+        "title": "Mobile Developer",
+        "description": "iOS, Android, and cross-platform development",
+        "duration": "8-12 months",
+        "difficulty": "Intermediate"
     }
 }
+
+
+def _parse_markdown_path(path_id: str) -> Optional[dict]:
+    """Parse a learning path from markdown file."""
+    md_file = PATHS_DIR / f"{path_id}.md"
+    
+    if not md_file.exists():
+        return None
+    
+    with open(md_file) as f:
+        content = f.read()
+    
+    # Parse metadata from markdown
+    import re
+    
+    # Extract title
+    title_match = re.search(r'^#\s+(.+)$', content, re.MULTILINE)
+    title = title_match.group(1) if title_match else PATHS_METADATA.get(path_id, {}).get("title", path_id)
+    
+    # Extract duration and difficulty from metadata section
+    duration_match = re.search(r'\*\*持续时间:\*\*\s*(.+)$', content, re.MULTILINE)
+    duration = duration_match.group(1) if duration_match else "Unknown"
+    
+    difficulty_match = re.search(r'\*\*难度:\*\*\s*(.+)$', content, re.MULTILINE)
+    difficulty = difficulty_match.group(1) if difficulty_match else "Unknown"
+    
+    # Extract stages (H2 headers with stage emoji)
+    stage_matches = re.findall(r'^##\s+🎯\s+阶段\s*\d+:\s*(.+)$', content, re.MULTILINE)
+    stages = [{"name": stage.strip(), "projects": 3} for stage in stage_matches]
+    
+    # If no stages found, use default
+    if not stages:
+        stages = PATHS_METADATA.get(path_id, {}).get("stages", [])
+    
+    return {
+        "id": path_id,
+        "title": title,
+        "description": PATHS_METADATA.get(path_id, {}).get("description", ""),
+        "duration": duration,
+        "difficulty": difficulty,
+        "stages": stages,
+        "content": content,
+        "html": markdown.markdown(content)
+    }
 
 
 @router.get("")
 async def list_paths():
     """List all available learning paths."""
-    paths = list(DEFAULT_PATHS.values())
+    paths = []
     
-    # Check for custom paths in markdown files
+    # Load paths from markdown files
     if PATHS_DIR.exists():
         for md_file in PATHS_DIR.glob("*.md"):
             path_id = md_file.stem
-            if path_id in DEFAULT_PATHS:
-                # Merge with default
-                for p in paths:
-                    if p["id"] == path_id:
-                        p["custom"] = True
-                        break
+            path_data = _parse_markdown_path(path_id)
+            if path_data:
+                # Remove heavy content for list view
+                path_data.pop("content", None)
+                path_data.pop("html", None)
+                paths.append(path_data)
+    
+    # Fallback to metadata if no markdown files
+    if not paths:
+        for path_id, meta in PATHS_METADATA.items():
+            paths.append({
+                "id": path_id,
+                **meta
+            })
     
     return {"paths": paths, "count": len(paths)}
 
@@ -79,18 +126,10 @@ async def list_paths():
 @router.get("/{path_id}")
 async def get_path(path_id: str):
     """Get a specific learning path with details."""
-    if path_id not in DEFAULT_PATHS:
-        raise HTTPException(status_code=404, detail="Learning path not found")
+    path_data = _parse_markdown_path(path_id)
     
-    path_data = DEFAULT_PATHS[path_id].copy()
-    
-    # Check for custom markdown content
-    md_file = PATHS_DIR / f"{path_id}.md"
-    if md_file.exists():
-        with open(md_file) as f:
-            content = f.read()
-            path_data["content"] = content
-            path_data["html"] = markdown.markdown(content)
+    if not path_data:
+        raise HTTPException(status_code=404, detail=f"Learning path '{path_id}' not found")
     
     # Get recommended repos for each stage
     path_data["stages_with_repos"] = []
