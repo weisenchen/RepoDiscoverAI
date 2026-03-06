@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RepoDiscoverAI - Discover Awesome GitHub Repositories</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .htmx-request { opacity: 0.5; }
+        .repo-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .repo-card { transition: all 0.2s ease; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">
+                        🚀 RepoDiscoverAI
+                    </h1>
+                    <p class="text-gray-600 mt-1">
+                        Discover awesome GitHub repositories
+                    </p>
+                </div>
+                <nav class="flex gap-4">
+                    <a href="/" class="text-blue-600 hover:text-blue-800 font-medium">Home</a>
+                    <a href="/docs" class="text-gray-600 hover:text-gray-800 font-medium">API Docs</a>
+                    <a href="https://github.com/weisenchen/RepoDiscoverAI" class="text-gray-600 hover:text-gray-800 font-medium">GitHub</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Search Section -->
+        <div class="mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">🔍 Search Repositories</h2>
+                <form class="flex flex-col md:flex-row gap-4" 
+                      hx-get="/api/search" 
+                      hx-target="#results"
+                      hx-trigger="submit"
+                      hx-indicator="#search-indicator">
+                    <input type="text" 
+                           name="q" 
+                           placeholder="Search repositories (e.g., machine learning, web framework)..." 
+                           class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                           required>
+                    <select name="language" 
+                            class="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="">All Languages</option>
+                        <option value="Python">Python</option>
+                        <option value="JavaScript">JavaScript</option>
+                        <option value="TypeScript">TypeScript</option>
+                        <option value="Rust">Rust</option>
+                        <option value="Go">Go</option>
+                        <option value="Java">Java</option>
+                        <option value="C++">C++</option>
+                    </select>
+                    <select name="sort_by" 
+                            class="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="stars">Sort by Stars</option>
+                        <option value="forks">Sort by Forks</option>
+                        <option value="updated">Sort by Updated</option>
+                        <option value="name">Sort by Name</option>
+                    </select>
+                    <button type="submit" 
+                            class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+                        Search
+                    </button>
+                </form>
+                
+                <!-- Loading Indicator -->
+                <div id="search-indicator" class="htmx-indicator mt-4 text-center text-gray-500">
+                    <svg class="animate-spin h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="ml-2">Searching...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Filters -->
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-3">📊 Quick Filters</h3>
+            <div class="flex flex-wrap gap-2">
+                <button hx-get="/api/search?q=AI&language=Python&sort_by=stars" 
+                        hx-target="#results"
+                        class="px-4 py-2 bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200 transition">
+                    🤖 AI/ML
+                </button>
+                <button hx-get="/api/search?q=web&language=JavaScript&sort_by=stars" 
+                        hx-target="#results"
+                        class="px-4 py-2 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition">
+                    🌐 Web Dev
+                </button>
+                <button hx-get="/api/search?q=llm&language=Python&sort_by=stars" 
+                        hx-target="#results"
+                        class="px-4 py-2 bg-green-100 text-green-700 rounded-full hover:bg-green-200 transition">
+                    🧠 LLM
+                </button>
+                <button hx-get="/api/search?q=&min_stars=10000&sort_by=stars" 
+                        hx-target="#results"
+                        class="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-full hover:bg-yellow-200 transition">
+                    ⭐ 10k+ Stars
+                </button>
+                <button hx-get="/api/trending?period=week&limit=25" 
+                        hx-target="#results"
+                        class="px-4 py-2 bg-red-100 text-red-700 rounded-full hover:bg-red-200 transition">
+                    🔥 Trending
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="bg-white rounded-xl shadow p-4">
+                <div class="text-3xl font-bold text-blue-600" id="stat-total">-</div>
+                <div class="text-gray-600">Total Repos</div>
+            </div>
+            <div class="bg-white rounded-xl shadow p-4">
+                <div class="text-3xl font-bold text-green-600" id="stat-languages">-</div>
+                <div class="text-gray-600">Languages</div>
+            </div>
+            <div class="bg-white rounded-xl shadow p-4">
+                <div class="text-3xl font-bold text-purple-600" id="stat-max-stars">-</div>
+                <div class="text-gray-600">Max Stars</div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="grid gap-4">
+            <div class="text-center text-gray-500 py-12 bg-white rounded-xl shadow">
+                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <p class="text-lg">Start searching to discover repositories</p>
+                <p class="text-sm mt-2">Or click a quick filter above</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t mt-12">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="text-gray-600">
+                    © 2026 RepoDiscoverAI. Built with ❤️ for developers.
+                </div>
+                <div class="flex gap-6">
+                    <a href="https://github.com/weisenchen/RepoDiscoverAI" class="text-gray-600 hover:text-gray-800">
+                        GitHub
+                    </a>
+                    <a href="/docs" class="text-gray-600 hover:text-gray-800">
+                        API Documentation
+                    </a>
+                    <a href="/redoc" class="text-gray-600 hover:text-gray-800">
+                        ReDoc
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Load Stats on Page Load -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/search/stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('stat-total').textContent = data.total_repos || '0';
+                    document.getElementById('stat-languages').textContent = data.languages || '0';
+                    document.getElementById('stat-max-stars').textContent = data.max_stars ? (data.max_stars / 1000).toFixed(1) + 'k' : '0';
+                })
+                .catch(err => console.error('Error loading stats:', err));
+        });
+
+        // HTMX event handlers for better UX
+        document.body.addEventListener('htmx:afterSwap', function(event) {
+            if (event.detail.target.id === 'results') {
+                // Scroll to results on mobile
+                if (window.innerWidth < 768) {
+                    event.detail.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///data/repos.db
+      - LOG_LEVEL=INFO
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Optional: Meilisearch for advanced search (Phase 2)
+  # Uncomment to enable
+  # meilisearch:
+  #   image: getmeili/meilisearch:v1.6
+  #   ports:
+  #     - "7700:7700"
+  #   volumes:
+  #     - meili_data:/meili_data
+  #   environment:
+  #     - MEILI_NO_ANALYTICS=true
+  #   profiles:
+  #     - advanced
+
+# volumes:
+#   meili_data:
