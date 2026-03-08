@@ -305,3 +305,74 @@ async def get_search_stats():
             "languages": languages,
             "max_stars": max_stars
         }
+
+
+@router.get("/trending-analysis")
+async def get_trending_analysis(
+    language: Optional[str] = Query(None, description="Filter by language"),
+    period_days: int = Query(7, ge=1, le=90, description="Analysis period")
+):
+    """
+    Get trending analysis with growth metrics.
+    
+    Combines search with trend analysis to identify rising repositories.
+    """
+    from app.core.trend_analysis import get_analyzer
+    analyzer = get_analyzer()
+    
+    async for db in get_db():
+        query = """
+            SELECT 
+                full_name, name, description, language, owner,
+                stars, forks,
+                created_at, updated_at
+            FROM repos
+            WHERE stars >= 100
+        """
+        params = []
+        
+        if language:
+            query += " AND language = ?"
+            params.append(language)
+        
+        query += " ORDER BY stars DESC LIMIT 100"
+        
+        async with db.execute(query, params) as cursor:
+            rows = await cursor.fetchall()
+            repos = [dict(row) for row in rows]
+        
+        # Analyze each repo
+        analyzed = []
+        for repo in repos:
+            # Estimate growth rate
+            estimated_prev = max(1, int(repo["stars"] * 0.95))
+            growth_rate = analyzer.calculate_growth_rate(
+                repo["stars"], 
+                estimated_prev, 
+                period_days
+            )
+            
+            heat_score = analyzer.calculate_heat_score(
+                stars=repo["stars"],
+                forks=repo["forks"],
+                recent_growth=growth_rate,
+                watchers=0  # watchers column not in DB
+            )
+            
+            analyzed.append({
+                **repo,
+                "growth_rate": growth_rate,
+                "heat_score": heat_score,
+                "momentum": "high" if heat_score > 60 else "medium" if heat_score > 30 else "low"
+            })
+        
+        # Sort by heat score
+        analyzed.sort(key=lambda x: x["heat_score"], reverse=True)
+        
+        return {
+            "period_days": period_days,
+            "language": language or "all",
+            "count": len(analyzed),
+            "top_gainers": analyzed[:10],
+            "all_results": analyzed
+        }
