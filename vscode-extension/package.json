@@ -1,0 +1,141 @@
+{
+  "name": "repodiscoverai",
+  "displayName": "RepoDiscoverAI",
+  "description": "Discover awesome GitHub repositories without leaving VS Code",
+  "version": "0.1.0",
+  "publisher": "weisenchen",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "SCM Providers"
+  ],
+  "keywords": [
+    "github",
+    "repository",
+    "discover",
+    "search",
+    "awesome",
+    "ai"
+  ],
+  "activationEvents": [
+    "onCommand:repodiscoverai.search",
+    "onCommand:repodiscoverai.trending",
+    "onCommand:repodiscoverai.collections"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "repodiscoverai.search",
+        "title": "RepoDiscoverAI: Search Repositories"
+      },
+      {
+        "command": "repodiscoverai.trending",
+        "title": "RepoDiscoverAI: View Trending"
+      },
+      {
+        "command": "repodiscoverai.collections",
+        "title": "RepoDiscoverAI: View Collections"
+      },
+      {
+        "command": "repodiscoverai.clone",
+        "title": "RepoDiscoverAI: Clone Repository"
+      },
+      {
+        "command": "repodiscoverai.openDetails",
+        "title": "RepoDiscoverAI: Open Repo Details"
+      }
+    ],
+    "configuration": {
+      "title": "RepoDiscoverAI",
+      "properties": {
+        "repodiscoverai.apiUrl": {
+          "type": "string",
+          "default": "https://api.repodiscover.ai",
+          "description": "RepoDiscoverAI API base URL"
+        },
+        "repodiscoverai.clonePath": {
+          "type": "string",
+          "default": "~/projects",
+          "description": "Default clone destination path"
+        },
+        "repodiscoverai.showStars": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show star count in search results"
+        },
+        "repodiscoverai.defaultLanguage": {
+          "type": "string",
+          "default": "all",
+          "description": "Default language filter"
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "repodiscoverai-sidebar",
+          "title": "RepoDiscoverAI",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "repodiscoverai-sidebar": [
+        {
+          "type": "webview",
+          "id": "repodiscoverai.webview",
+          "name": "RepoDiscoverAI",
+          "icon": "resources/icon.svg",
+          "contextualTitle": "RepoDiscoverAI"
+        }
+      ]
+    },
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "repodiscoverai.search"
+        },
+        {
+          "command": "repodiscoverai.trending"
+        },
+        {
+          "command": "repodiscoverai.collections"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "typescript": "^5.3.0",
+    "@vscode/vsce": "^2.22.0"
+  },
+  "dependencies": {
+    "node-fetch": "^2.7.0"
+  },
+  "icon": "resources/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/weisenchen/RepoDiscoverAI.git"
+  },
+  "bugs": {
+    "url": "https://github.com/weisenchen/RepoDiscoverAI/issues"
+  },
+  "homepage": "https://github.com/weisenchen/RepoDiscoverAI#readme",
+  "license": "MIT"
+}
