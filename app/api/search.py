@@ -13,10 +13,11 @@ Advanced Search Syntax:
 - order:desc - Sort order (asc/desc)
 """
 
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, Query, HTTPException, Request
 from typing import Optional, List
 import re
 from app.db.sqlite import get_db, execute_query
+from app.core.htmx import templates, is_htmx
 
 router = APIRouter()
 
@@ -101,6 +102,7 @@ def parse_advanced_query(query: str) -> dict:
 
 @router.get("")
 async def search_repos(
+    request: Request,
     q: str = Query("", description="Search query (supports advanced syntax: stars:>1000, language:Python, sort:stars)"),
     language: Optional[str] = Query(None, description="Filter by programming language"),
     min_stars: Optional[int] = Query(None, description="Minimum star count"),
@@ -211,6 +213,12 @@ async def search_repos(
             row = await cursor.fetchone()
             total = row[0] if row else 0
         
+        if is_htmx(request):
+            return templates.TemplateResponse(
+                "repo_list.html", 
+                {"request": request, "repos": repos}
+            )
+            
         return {
             "query": q,
             "filters": {

@@ -4,11 +4,12 @@ Trending API - GitHub Trending Endpoints
 Provides access to trending repositories and trend analysis.
 """
 
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, Query, HTTPException, Request
 from typing import Optional, List
 from datetime import datetime, timedelta
 from app.db.sqlite import get_db
 from app.core.trend_analysis import get_analyzer
+from app.core.htmx import templates, is_htmx
 
 router = APIRouter()
 analyzer = get_analyzer()
@@ -16,6 +17,7 @@ analyzer = get_analyzer()
 
 @router.get("")
 async def get_trending(
+    request: Request,
     period: str = Query("today", enum=["today", "week", "month"], description="Time period"),
     language: Optional[str] = Query(None, description="Filter by language"),
     limit: int = Query(25, ge=1, le=100, description="Number of results")
@@ -56,6 +58,12 @@ async def get_trending(
             rows = await cursor.fetchall()
             repos = [dict(row) for row in rows]
         
+        if is_htmx(request):
+            return templates.TemplateResponse(
+                "repo_list.html", 
+                {"request": request, "repos": repos}
+            )
+            
         return {
             "period": period,
             "language": language or "all",
