@@ -176,8 +176,8 @@
 
     <!-- Load Stats on Page Load -->
     <script>
-        // Use port 8000 for API calls if served from 8080 (static server)
-        const API_BASE = window.location.port === '8080' ? 'http://localhost:8000' : '';
+        // Default to relative paths for unified server (port 8080)
+        const API_BASE = '';
 
         document.addEventListener('DOMContentLoaded', function () {
             // Update documentation links if API_BASE is set
