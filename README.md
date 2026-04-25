@@ -1,37 +1,36 @@
-# RepoDiscoverAI 2.0
+# RepoDiscoverAI v3.0 🚀
 
 **Discover, Learn, Contribute — Your Gateway to Awesome Open Source AI Projects**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Stars](https://img.shields.io/github/stars/weisenchen/RepoDiscoverAI)](https://github.com/weisenchen/RepoDiscoverAI/stargazers)
-[![CI/CD](https://github.com/weisenchen/RepoDiscoverAI/actions/workflows/ci.yml/badge.svg)](https://github.com/weisenchen/RepoDiscoverAI/actions)
-[![Docker Pulls](https://img.shields.io/docker/pulls/repodiscoverai/app)](https://hub.docker.com/r/repodiscoverai/app)
+RepoDiscoverAI is your intelligent companion for discovering, learning, and contributing to outstanding AI-powered open source projects on GitHub.
+
+**v3.0 New Features:**
+- 📊 Real-time GitHub trending monitoring
+- 🎙️ Podcast audio generation (ElevenLabs)
+- 📺 YouTube video generation (Shotstack)
+- 🐦 Social media automation (Twitter/X)
+- 📡 RSS/Atom feed subscriptions
+- 🤖 Agent-ready Markdown output
+- ⚡ Automated daily digest workflow
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (2 minutes)
 
 ```bash
-# One-click deployment (2 minutes)
 git clone https://github.com/weisenchen/RepoDiscoverAI.git
 cd RepoDiscoverAI
-docker compose up -d
+docker compose -f docker-compose.v3.yml up -d
 
 # Access the app
 open http://localhost:8080
 ```
 
-**That's it!** You now have a fully functional GitHub discovery tool running locally.
+That's it! You now have a fully functional GitHub discovery tool with multi-format content generation.
 
 ---
 
-## ✨ What is RepoDiscoverAI?
-
-RepoDiscoverAI is your **intelligent companion** for discovering, learning, and contributing to outstanding AI-powered open source projects on GitHub.
-
-> 🎯 **Mission:** Make every developer able to easily discover, learn, and contribute to excellent open source projects.
-
-### 🧭 For Different Users
+## 📊 What You Get
 
 | You Are... | You Get... |
 |------------|------------|
@@ -39,288 +38,229 @@ RepoDiscoverAI is your **intelligent companion** for discovering, learning, and 
 | **Developer** | Smart search with typo tolerance + project comparison |
 | **Researcher** | Daily trending analysis + growth insights |
 | **Contributor** | Good First Issue aggregation + contribution tracking |
+| **Content Creator** | Podcast, YouTube, Twitter, RSS, Markdown auto-generation |
 
 ---
 
-## 🎨 Core Features
+## 🎯 v3.0 Features
 
-### 🔍 Smart Search
+### 1. GitHub Trending Monitor
+- **Real-time monitoring** of GitHub trending repositories
+- **Multi-signal scoring**: Star velocity, fork velocity, issue activity, PR merge rate, social mentions
+- **6-hour updates** with historical tracking
+- **Trend detection algorithm** with configurable weights
 
-```bash
-# CLI search
-$ repodiscover search "NLP library" --language python --stars 1000..50000
+### 2. Multi-Format Content Generation
+Generate content in 5 formats automatically:
 
-# Advanced syntax
-$ repodiscover search "stars:>10000 language:python topic:machine-learning"
+| Format | Technology | Output |
+|--------|------------|--------|
+| **Podcast Audio** | ElevenLabs API | MP3 files |
+| **YouTube Video** | Shotstack API | MP4 videos |
+| **Social Media** | Twitter API v2 | Tweet threads |
+| **RSS/Atom Feed** | feedgen | XML feeds |
+| **Agent Markdown** | Python markdown | LLM-ready docs |
 
-# Fuzzy search (typo tolerant)
-$ repodiscover search "machne lerning"  # → "machine learning"
-```
+### 3. Data Source Subscriptions
+- **RSS/Atom**: Subscribe via Feedly, NetNewsWire, podcast apps
+- **JSON API**: Real-time REST API with webhooks
+- **Email Digest**: Daily HTML emails
+- **Slack/Discord**: Bot integration
+- **Telegram**: Bot notifications
 
-**Web UI features:**
-- ⚡ Real-time search suggestions
-- 🏷️ Multi-dimensional filters (language/stars/updated/license)
-- 📊 Side-by-side comparison view
-- 💾 Save search queries
-
-### 📚 Learning Paths
-
-Structured journeys from beginner to expert:
-
-```
-🌱 Beginner (0-3 months)
-├── Python Basics (3 projects)
-├── Git Fundamentals (2 projects)
-└── First AI Model (5 projects)
-
-🌿 Intermediate (3-12 months)
-├── Web Frameworks (Flask/FastAPI)
-├── Database Integration
-└── Deployment Practice
-
-🌳 Advanced (1+ year)
-├── System Design
-├── Performance Optimization
-└── Open Source Contribution
-```
-
-**Available paths:**
-- [AI Developer](./collections/learning-paths/ai-developer.md)
-- [Web Developer](./collections/learning-paths/web-developer.md)
-- [Data Scientist](./collections/learning-paths/data-scientist.md)
-
-### 📈 Trending Intelligence
-
-**Enhanced GitHub Trending with:**
-
-| Feature | Description |
-|---------|-------------|
-| **6-hour Updates** | Fresh data every 6 hours |
-| **Growth Analysis** | Star velocity + momentum scoring |
-| **Historical Data** | Complete time-series tracking |
-| **Comparisons** | Week-over-week / Month-over-month |
-| **Notifications** | Email/Slack/Discord alerts |
-
-### 🆚 Project Comparison
-
-Compare repos side-by-side:
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  Compare: langchain vs llama-index                     │
-├─────────────────────────────────────────────────────────┤
-│  Metric          │  langchain  │  llama-index          │
-├─────────────────────────────────────────────────────────┤
-│  ⭐ Stars       │  45,231     │  28,456                │
-│  🔀 Forks       │  8,234      │  5,123                 │
-│  👥 Contributors│  892        │  456                   │
-│  📅 Last Update │  2 days ago │  1 day ago             │
-│  📝 Commits/Week│  15         │  22                    │
-│  🎯 Best For    │  General    │  RAG Specialist        │
-└─────────────────────────────────────────────────────────┘
-```
-
-### ⭐ Personal Collections
-
-```bash
-# Star a project
-$ repodiscover star weisenchen/RepoDiscoverAI
-
-# Create a collection
-$ repodiscover collection create "My AI Stack"
-$ repodiscover collection add "My AI Stack" langchain llama-index
-
-# Export and share
-$ repodiscover collection export "My AI Stack" --format markdown
-```
-
-### 🛠️ CLI Tool
-
-Beautiful, fast, and powerful:
-
-```bash
-# Install
-$ pip install -e .
-
-# Quick search
-$ repodiscover search "vector database" --limit 10
-
-# View trending
-$ repodiscover trending --period week --language python
-
-# Open in browser
-$ repodiscover open langchain-ai/langchain
-```
+### 4. Automation & Scheduling
+- **GitHub Actions**: Daily digest at 7 PM EDT
+- **Docker Compose**: One-command deployment
+- **Cron Jobs**: Flexible scheduling
+- **Error Handling**: Retry logic & notifications
 
 ---
 
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      User Interface Layer                    │
-├──────────────┬──────────────┬──────────────┬────────────────┤
-│   CLI Tool   │   Web UI     │  VSCode Ext  │   REST API     │
-│  (Rich TUI)  │  (HTMX)      │  (Extension) │  (FastAPI)     │
-└──────────────┴──────────────┴──────────────┴────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      Core Services Layer                     │
-├────────────┬────────────┬────────────┬────────────┬─────────┤
-│  Search    │ Recommend  │  Trends    │  Learning  │  User   │
-│(Meilisearch)│  (ML)     │ (Analytics)│  (Curated) │ (Optional)│
-└────────────┴────────────┴────────────┴────────────┴─────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                         Data Layer                           │
-├───────────┬───────────┬───────────┬───────────┬─────────────┤
-│ GitHub API│  Crawler  │  Curated  │  User     │   Cache     │
-│  (Live)   │ (Trending)│ (Awesome) │ (SQLite)  │   (Redis)   │
-└───────────┴───────────┴───────────┴───────────┴─────────────┘
-```
-
-### Tech Stack
-
-| Component | Technology | Why |
-|-----------|------------|-----|
-| **Backend** | Python + FastAPI | Lightweight, fast, rich ecosystem |
-| **Frontend** | HTMX + Alpine.js | Zero-build, ultra-light, instant |
-| **Search** | Meilisearch | Open-source, local, typo-tolerant |
-| **Database** | SQLite + DuckDB | Zero-config, powerful analytics |
-| **Cache** | Redis (optional) | High performance |
-| **Deploy** | Docker Compose | One-command startup |
-| **CLI** | Python + Rich | Beautiful terminal UI |
-
----
-
-## 📁 Project Structure
+## 📁 Architecture
 
 ```
 RepoDiscoverAI/
-├── 📄 README.md                       # You are here!
-├── 📄 REDESIGN_PLAN.md                # v2.0 design document
-├── 📄 docker-compose.yml              # One-click deployment
-├── 📄 pyproject.toml                  # Python project config
-│
-├── 📂 app/                            # FastAPI Backend
-│   ├── main.py                        # Application entry
-│   ├── api/                           # API routes
-│   │   ├── search.py
-│   │   ├── trending.py
-│   │   ├── collections.py
-│   │   └── health.py
-│   ├── core/                          # Core logic
-│   │   ├── search_engine.py
-│   │   ├── recommendation.py
-│   │   └── github_client.py
-│   └── db/                            # Database layer
-│
-├── 📂 frontend/                       # Web UI (HTMX)
-│   ├── index.html                     # Main page
-│   ├── components/                    # Reusable components
-│   └── static/                        # Static assets
-│
-├── 📂 cli/                            # Command Line Tool
-│   ├── main.py                        # CLI entry
-│   └── commands/                      # CLI commands
-│
-├── 📂 collections/                    # Curated Lists
-│   └── learning-paths/                # Learning journeys
-│       ├── ai-developer.md
-│       ├── web-developer.md
-│       └── data-scientist.md
-│
-├── 📂 scripts/                        # Automation
-│   ├── github_trending_scraper.py     # Daily trending scraper
-│   ├── backup.sh                      # Automated backups
-│   └── migrate.py                     # DB migrations
-│
-├── 📂 monitoring/                     # Observability
-│   ├── prometheus.yml                 # Metrics collection
-│   ├── grafana/                       # Dashboards
-│   └── loki-config.yml                # Log aggregation
-│
-└── 📂 .github/workflows/              # CI/CD
-    └── ci.yml                         # Automated pipeline
+├── app/
+│   ├── modules/          # v3.0 Content Generation
+│   │   ├── trend_monitor.py
+│   │   ├── content_generator.py
+│   │   ├── podcast_generator.py
+│   │   ├── youtube_generator.py
+│   │   ├── social_media_generator.py
+│   │   ├── rss_generator.py
+│   │   └── markdown_generator.py
+│   ├── api/              # FastAPI routes
+│   ├── core/             # Core logic
+│   ├── db/               # Database layer
+│   └── models/           # Pydantic models
+├── scripts/
+│   └── daily_digest.py   # Daily automation
+├── output/               # Generated content
+├── .github/workflows/
+│   └── daily-digest.yml  # GitHub Actions
+├── docker-compose.v3.yml # v3.0 deployment
+└── requirements-v3.txt   # v3.0 dependencies
 ```
 
 ---
 
-## 🚀 Deployment Options
+## 🔧 Installation & Setup
 
-### Option 1: Docker Compose (Recommended)
+### Prerequisites
+- Python 3.12+
+- Docker & Docker Compose
+- API Keys (see below)
 
+### 1. Clone & Install
 ```bash
-# Development
-docker compose up -d
-open http://localhost:8080
+git clone https://github.com/weisenchen/RepoDiscoverAI.git
+cd RepoDiscoverAI
+pip install -r requirements.txt
+pip install -r requirements-v3.txt
+```
 
-# Production
+### 2. Configure Environment
+```bash
 cp .env.example .env
-# Edit .env with your settings
-docker compose -f docker-compose.prod.yml up -d
+# Edit .env with your API keys
 ```
 
-### Option 2: Local Development
-
+### 3. Run Daily Digest
 ```bash
-# Install dependencies
-pip install -e ".[dev]"
+# Manual run
+python scripts/daily_digest.py --top-n 5 --output-dir ./output
 
-# Run backend
-python -m uvicorn app.main:app --reload
-
-# Run frontend (separate terminal)
-cd frontend && python -m http.server 8080
+# Dry run (generate without posting)
+python scripts/daily_digest.py --dry-run
 ```
 
-### Option 3: CLI Only
-
+### 4. Docker Deployment
 ```bash
-# Install CLI
-pip install -e .
+# Start all services
+docker compose -f docker-compose.v3.yml up -d
 
-# Use without server
-repodiscover search "machine learning"
+# Run daily digest worker
+docker compose -f docker-compose.v3.yml run worker
 ```
 
 ---
 
-## 📊 Project Status
+## 🔑 API Keys Required
 
-### ✅ Completed (Phase 1-5)
-
-| Phase | Focus | Status | Date |
-|-------|-------|--------|------|
-| **Phase 1** | Foundation | ✅ 100% | 2026-03-05 |
-| **Phase 2** | Core Features | ✅ 100% | 2026-03-07 |
-| **Phase 3** | AI Integration | ✅ 100% | 2026-03-08 |
-| **Phase 4** | Advanced Features | ✅ 100% | 2026-03-09 |
-| **Phase 5** | Production Ready | ✅ 100% | 2026-03-11 |
-
-### 🔄 Current Focus
-
-- **Production Deployment** - Live environment setup
-- **User Testing** - Feedback collection
-- **Performance Optimization** - Sub-second responses
+| Service | Purpose | Free Tier | Get Key |
+|---------|---------|-----------|---------|
+| **GitHub** | Trend monitoring | 5,000 req/hr | GitHub Settings |
+| **ElevenLabs** | Podcast audio | 10K chars/mo | elevenlabs.io |
+| **Shotstack** | YouTube video | 30 sec/mo | shotstack.io |
+| **Twitter/X** | Social media | Free tier | developer.twitter.com |
 
 ---
 
-## 📈 Roadmap
+## 📊 Usage Examples
 
-### Q2 2026
-- [ ] Kubernetes deployment option
-- [ ] Multi-region support
-- [ ] Advanced analytics dashboard
-- [ ] VSCode extension v1.0
+### CLI Search
+```bash
+# Search repositories
+repodiscover search "NLP library" --language python --stars 1000..5000
 
-### Q3 2026
-- [ ] Mobile app (React Native)
-- [ ] API SDK (Python/JS/Go)
-- [ ] Enterprise features
-- [ ] Community contribution system
+# View trending
+repodiscover trending --period week --language python
+
+# Open in browser
+repodiscover open langchain-ai/langchain
+```
+
+### API Endpoints
+```bash
+# Search
+GET /api/search?q=machine+learning&language=python
+
+# Trending
+GET /api/trending?period=daily
+
+# Daily Digest
+GET /api/daily-digest?top-n=5
+```
+
+### Web UI
+- **Real-time search** with suggestions
+- **Multi-dimensional filters** (language/stars/updated/license)
+- **Side-by-side comparison** view
+- **Save search queries**
+
+---
+
+## 📈 Daily Digest Output
+
+### Example Markdown (Agent-Ready)
+```markdown
+# RepoDiscoverAI Daily Digest - 2026-04-25
+
+## Top Repositories
+
+### 1. microsoft/agent-governance-toolkit
+**URL:** https://github.com/microsoft/agent-governance-toolkit
+**Stars:** 3,200 | **Forks:** 180
+**Trend Score:** 0.8472
+
+**Description:** Open-source runtime security for AI agents...
+```
+
+### Example Podcast Script
+```
+🎙️ RepoDiscoverAI Daily Digest - 2026-04-25
+
+Welcome to today's episode where we explore the hottest
+repositories on GitHub!
+
+📌 Number 1: microsoft/agent-governance-toolkit
+Open-source runtime security for AI agents...
+```
+
+---
+
+## 🚀 Automation
+
+### GitHub Actions
+Automated daily digest at 7 PM EDT:
+- Fetch trending repos
+- Generate all content formats
+- Commit to `output/` directory
+- Deploy to GitHub Pages
+- Post to social media (if configured)
+
+### Manual Trigger
+```bash
+# Via GitHub UI: Actions → Daily Digest → Run workflow
+# Via API:
+curl -X POST https://api.github.com/repos/weisenchen/RepoDiscoverAI/actions/workflows/daily-digest.yml/dispatches \
+  -H "Authorization: token $GITHUB_TOKEN" \
+  -H "Accept: application/vnd.github.v3+json" \
+  -d '{"ref":"main"}'
+```
+
+---
+
+## 📚 Documentation
+
+- [V3 Development Plan](docs/V3_DEVELOPMENT_PLAN.md)
+- [API Reference](docs/api.md)
+- [Deployment Guide](DEPLOYMENT.md)
+- [Security Guide](SECURITY.md)
+- [Contributing Guide](CONTRIBUTING.md)
+
+---
+
+## 📊 Metrics
+
+| Metric | Value |
+|--------|-------|
+| Repos Indexed | 5,000+ |
+| Daily Searches | 500+ |
+| Learning Paths | 5 |
+| Docker Pulls | 1,000+ |
+| Uptime | 99.5%+ |
+| Content Formats | 5 (Podcast, YouTube, Twitter, RSS, Markdown) |
 
 ---
 
@@ -339,77 +279,18 @@ We welcome contributions! See our [Contributing Guide](CONTRIBUTING.md) for deta
 
 ---
 
-## 📚 Documentation
-
-| Doc | Description |
-|-----|-------------|
-| [Deployment Guide](DEPLOYMENT.md) | Production deployment instructions |
-| [Monitoring Guide](MONITORING.md) | Observability setup |
-| [Security Guide](SECURITY.md) | Security hardening |
-| [API Docs](docs/api.md) | REST API reference |
-| [CLI Help](cli/README.md) | Command line usage |
-
----
-
-## 📊 Metrics
-
-| Metric | Value |
-|--------|-------|
-| **Repos Indexed** | 5,000+ |
-| **Daily Searches** | 500+ |
-| **Learning Paths** | 3 |
-| **Docker Pulls** | 1,000+ |
-| **Uptime** | 99.5%+ |
-
----
-
-## 🔒 Security & Privacy
-
-- **No login required** for core features
-- **Local-first** - all data can be stored locally
-- **Open source** - transparent codebase
-- **GDPR compliant** - export/delete your data anytime
-
-See [SECURITY.md](SECURITY.md) for details.
-
----
-
-## 💰 Cost
-
-**Completely free** for self-hosted usage!
-
-| Component | Cost |
-|-----------|------|
-| Software | Free (MIT License) |
-| Self-hosted | $0 |
-| Cloud demo | Free tier available |
-| Enterprise | Custom pricing |
-
----
-
-## 📞 Support
-
-| Need | Contact |
-|------|---------|
-| Bug Report | [GitHub Issues](https://github.com/weisenchen/RepoDiscoverAI/issues) |
-| Feature Request | [GitHub Discussions](https://github.com/weisenchen/RepoDiscoverAI/discussions) |
-| Security Issue | security@repodiscoverai.com |
-| General Inquiry | support@repodiscoverai.com |
-
----
-
-## 🙏 Acknowledgments
-
-- [GitHub API](https://docs.github.com/en/rest) - Repository data
-- [Meilisearch](https://www.meilisearch.com/) - Search engine
-- [HTMX](https://htmx.org/) - Frontend framework
-- [Rich](https://github.com/Textualize/rich) - CLI formatting
-
----
-
-## 📜 License
+## 📄 License
 
 MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+## 📞 Contact
+
+- **Bug Report:** [GitHub Issues](https://github.com/weisenchen/RepoDiscoverAI/issues)
+- **Feature Request:** [GitHub Discussions](https://github.com/weisenchen/RepoDiscoverAI/discussions)
+- **Security Issue:** security@repodiscoverai.com
+- **General Inquiry:** support@repodiscoverai.com
 
 ---
 
