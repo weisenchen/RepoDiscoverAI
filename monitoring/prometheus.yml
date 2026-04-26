@@ -1,80 +1,17 @@
-# Prometheus Configuration for RepoDiscoverAI
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
-  external_labels:
-    monitor: 'repodiscoverai'
-    environment: 'production'
 
-# Alertmanager configuration
-alerting:
-  alertmanagers:
-    - static_configs:
-        - targets:
-          - alertmanager:9093
-
-# Rule files
-rule_files:
-  - /etc/prometheus/alerts.yml
-
-# Scrape configurations
 scrape_configs:
-  # Prometheus self-monitoring
-  - job_name: 'prometheus'
+  - job_name: 'repodiscoverai'
     static_configs:
-      - targets: ['localhost:9090']
-    metrics_path: /metrics
+      - targets: ['app:8080']
+    metrics_path: '/metrics'
 
-  # Node Exporter (system metrics)
   - job_name: 'node'
     static_configs:
-      - targets: ['host.docker.internal:9100']
-    relabel_configs:
-      - source_labels: [__address__]
-        target_label: instance
-        regex: '(.+):\d+'
-        replacement: '${1}'
+      - targets: ['node-exporter:9100']
 
-  # FastAPI Application
-  - job_name: 'repodiscover-web'
-    static_configs:
-      - targets: ['web:8000']
-    metrics_path: /metrics
-    scrape_interval: 10s
-    scrape_timeout: 5s
-
-  # Nginx
-  - job_name: 'nginx'
-    static_configs:
-      - targets: ['nginx:80']
-    metrics_path: /nginx_status
-
-  # PostgreSQL
-  - job_name: 'postgres'
-    static_configs:
-      - targets: ['postgres:5432']
-    metrics_path: /metrics
-
-  # Redis
   - job_name: 'redis'
     static_configs:
-      - targets: ['redis:6379']
-    metrics_path: /metrics
-
-  # Loki (logs)
-  - job_name: 'loki'
-    static_configs:
-      - targets: ['loki:3100']
-    metrics_path: /metrics
-
-  # Alertmanager
-  - job_name: 'alertmanager'
-    static_configs:
-      - targets: ['alertmanager:9093']
-    metrics_path: /metrics
-
-  # Grafana
-  - job_name: 'grafana'
-    static_configs:
-      - targets: ['grafana:3000']
-    metrics_path: /metrics
+      - targets: ['redis-exporter:9121']

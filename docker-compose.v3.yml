@@ -15,16 +15,21 @@ services:
       - TWITTER_ACCESS_TOKEN_SECRET=${TWITTER_ACCESS_TOKEN_SECRET}
       - SITE_URL=${SITE_URL:-https://repodiscoverai.com}
       - OUTPUT_DIR=/app/output
+      - LOG_LEVEL=INFO
+      - CACHE_DIR=/app/cache
     volumes:
       - ./data:/app/data
       - ./output:/app/output
+      - ./cache:/app/cache
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-  
+    networks:
+      - repodiscover-network
+
   worker:
     build: .
     command: python scripts/daily_digest.py --top-n 5 --output-dir ./output
@@ -39,10 +44,12 @@ services:
     volumes:
       - ./data:/app/data
       - ./output:/app/output
-    restart: "no"  # Run once and exit
+    restart: "no"
     depends_on:
       - app
-  
+    networks:
+      - repodiscover-network
+
   redis:
     image: redis:7-alpine
     ports:
@@ -55,6 +62,44 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    networks:
+      - repodiscover-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    restart: unless-stopped
+    networks:
+      - repodiscover-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    networks:
+      - repodiscover-network
 
 volumes:
   redis-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  repodiscover-network:
+    driver: bridge

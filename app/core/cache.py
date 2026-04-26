@@ -1,387 +1,119 @@
 """
-Redis Caching Layer
+RepoDiscoverAI v3.0 - Cache Management
 
-Improve performance with multi-level caching strategy.
+Provides caching layer for API responses and generated content.
 """
 
-import json
-import hashlib
-import logging
-from typing import Optional, Any, Dict, List
-from datetime import timedelta
-from pathlib import Path
 import asyncio
+import hashlib
+import json
+import logging
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
 
-class CacheConfig:
-    """Cache configuration."""
+class CacheManager:
+    """Simple file-based cache with TTL support."""
     
-    # TTL settings (in seconds)
-    TTL_SEARCH_RESULTS = 300  # 5 minutes
-    TTL_TRENDING = 600  # 10 minutes
-    TTL_REPO_DETAILS = 3600  # 1 hour
-    TTL_USER_DATA = 1800  # 30 minutes
-    
-    # Cache keys prefix
-    PREFIX_SEARCH = "search:"
-    PREFIX_TRENDING = "trending:"
-    PREFIX_REPO = "repo:"
-    PREFIX_USER = "user:"
-    PREFIX_COLLECTION = "collection:"
-
-
-class MemoryCache:
-    """In-memory cache (L1 cache)."""
-    
-    def __init__(self, max_size: int = 1000):
-        self.max_size = max_size
-        self._cache: Dict[str, Any] = {}
-        self._timestamps: Dict[str, float] = {}
-        self._access_order: List[str] = []
-    
-    def get(self, key: str) -> Optional[Any]:
-        """Get value from cache."""
-        if key in self._cache:
-            # Move to end (most recently used)
-            self._access_order.remove(key)
-            self._access_order.append(key)
-            return self._cache[key]
-        return None
-    
-    def set(self, key: str, value: Any, ttl: int = None):
-        """Set value in cache."""
-        import time
-        
-        # Evict if at max size
-        if len(self._cache) >= self.max_size and key not in self._cache:
-            # Remove least recently used
-            if self._access_order:
-                lru_key = self._access_order.pop(0)
-                self._cache.pop(lru_key, None)
-                self._timestamps.pop(lru_key, None)
-        
-        self._cache[key] = value
-        self._timestamps[key] = time.time()
-        if key not in self._access_order:
-            self._access_order.append(key)
-    
-    def delete(self, key: str):
-        """Delete key from cache."""
-        self._cache.pop(key, None)
-        self._timestamps.pop(key, None)
-        if key in self._access_order:
-            self._access_order.remove(key)
-    
-    def clear(self):
-        """Clear all cache."""
-        self._cache.clear()
-        self._timestamps.clear()
-        self._access_order.clear()
-    
-    def stats(self) -> Dict:
-        """Get cache statistics."""
-        return {
-            "size": len(self._cache),
-            "max_size": self.max_size,
-            "keys": list(self._cache.keys())[:10]  # First 10 keys
-        }
-
-
-class RedisCache:
-    """Redis cache (L2 cache)."""
-    
-    def __init__(self, host: str = "localhost", port: int = 6379, db: int = 0):
-        self.host = host
-        self.port = port
-        self.db = db
-        self._redis = None
-    
-    async def connect(self):
-        """Connect to Redis."""
-        try:
-            import redis.asyncio as redis
-            self._redis = redis.Redis(
-                host=self.host,
-                port=self.port,
-                db=self.db,
-                decode_responses=True
-            )
-            logger.info(f"✅ Connected to Redis at {self.host}:{self.port}")
-        except ImportError:
-            logger.warning("Redis not available, using memory cache only")
-            self._redis = None
-        except Exception as e:
-            logger.warning(f"Failed to connect to Redis: {e}")
-            self._redis = None
-    
-    async def disconnect(self):
-        """Disconnect from Redis."""
-        if self._redis:
-            await self._redis.close()
-            self._redis = None
+    def __init__(self, cache_dir: str = "./cache", default_ttl: int = 3600):
+        self.cache_dir = Path(cache_dir)
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.default_ttl = default_ttl
+        self.memory_cache: dict = {}
+        self.memory_ttl: dict = {}
     
     async def get(self, key: str) -> Optional[Any]:
-        """Get value from Redis."""
-        if not self._redis:
-            return None
-        
-        try:
-            value = await self._redis.get(key)
-            if value:
-                return json.loads(value)
-            return None
-        except Exception as e:
-            logger.error(f"Redis get error: {e}")
-            return None
-    
-    async def set(self, key: str, value: Any, ttl: int = None):
-        """Set value in Redis."""
-        if not self._redis:
-            return
-        
-        try:
-            serialized = json.dumps(value)
-            if ttl:
-                await self._redis.setex(key, ttl, serialized)
+        """Get value from cache."""
+        # Check memory cache first
+        if key in self.memory_cache:
+            if datetime.now() < self.memory_ttl[key]:
+                return self.memory_cache[key]
             else:
-                await self._redis.set(key, serialized)
-        except Exception as e:
-            logger.error(f"Redis set error: {e}")
-    
-    async def delete(self, key: str):
-        """Delete key from Redis."""
-        if not self._redis:
-            return
+                del self.memory_cache[key]
+                del self.memory_ttl[key]
         
-        try:
-            await self._redis.delete(key)
-        except Exception as e:
-            logger.error(f"Redis delete error: {e}")
-    
-    async def clear_pattern(self, pattern: str):
-        """Clear all keys matching pattern."""
-        if not self._redis:
-            return
+        # Check file cache
+        file_path = self.cache_dir / f"{self._hash_key(key)}.json"
+        if file_path.exists():
+            try:
+                with open(file_path, 'r') as f:
+                    data = json.load(f)
+                
+                # Check TTL
+                if datetime.fromisoformat(data['expires_at']) > datetime.now():
+                    # Load to memory cache
+                    self.memory_cache[key] = data['value']
+                    self.memory_ttl[key] = datetime.fromisoformat(data['expires_at'])
+                    return data['value']
+                else:
+                    file_path.unlink()
+            except Exception as e:
+                logger.warning(f"Cache read error for {key}: {e}")
         
-        try:
-            keys = await self._redis.keys(pattern)
-            if keys:
-                await self._redis.delete(*keys)
-        except Exception as e:
-            logger.error(f"Redis clear error: {e}")
-    
-    async def stats(self) -> Dict:
-        """Get Redis statistics."""
-        if not self._redis:
-            return {"available": False}
-        
-        try:
-            info = await self._redis.info("stats")
-            return {
-                "available": True,
-                "connected_clients": info.get("connected_clients", 0),
-                "used_memory": info.get("used_memory_human", "N/A"),
-                "keyspace_hits": info.get("keyspace_hits", 0),
-                "keyspace_misses": info.get("keyspace_misses", 0)
-            }
-        except Exception as e:
-            return {"available": False, "error": str(e)}
-
-
-class CacheManager:
-    """Two-level cache manager."""
-    
-    def __init__(self, use_redis: bool = True):
-        self.use_redis = use_redis
-        self.l1_cache = MemoryCache(max_size=1000)
-        self.l2_cache = RedisCache()
-        self._connected = False
-    
-    async def connect(self):
-        """Connect to Redis if enabled."""
-        if self.use_redis:
-            await self.l2_cache.connect()
-            self._connected = True
-    
-    async def disconnect(self):
-        """Disconnect from Redis."""
-        if self._connected:
-            await self.l2_cache.disconnect()
-            self._connected = False
-    
-    def _make_key(self, prefix: str, *args) -> str:
-        """Generate cache key from arguments."""
-        key_parts = [prefix] + [str(a) for a in args]
-        key_string = ":".join(key_parts)
-        # Hash long keys
-        if len(key_string) > 200:
-            key_hash = hashlib.md5(key_string.encode()).hexdigest()[:16]
-            return f"{prefix}:{key_hash}"
-        return key_string
-    
-    async def get(self, prefix: str, *args) -> Optional[Any]:
-        """Get value from cache (L1 → L2)."""
-        key = self._make_key(prefix, *args)
-        
-        # Try L1 (memory) cache first
-        value = self.l1_cache.get(key)
-        if value is not None:
-            logger.debug(f"Cache L1 hit: {key}")
-            return value
-        
-        # Try L2 (Redis) cache
-        if self.use_redis and self._connected:
-            value = await self.l2_cache.get(key)
-            if value is not None:
-                logger.debug(f"Cache L2 hit: {key}")
-                # Populate L1
-                self.l1_cache.set(key, value)
-                return value
-        
-        logger.debug(f"Cache miss: {key}")
         return None
     
-    async def set(self, prefix: str, value: Any, ttl: int = None, *args):
-        """Set value in cache (L1 + L2)."""
-        key = self._make_key(prefix, *args)
+    async def set(self, key: str, value: Any, ttl: Optional[int] = None):
+        """Set value in cache."""
+        ttl = ttl or self.default_ttl
+        expires_at = datetime.now() + timedelta(seconds=ttl)
         
-        # Set in L1
-        self.l1_cache.set(key, value, ttl)
+        # Store in memory
+        self.memory_cache[key] = value
+        self.memory_ttl[key] = expires_at
         
-        # Set in L2
-        if self.use_redis and self._connected:
-            await self.l2_cache.set(key, value, ttl)
+        # Store in file
+        file_path = self.cache_dir / f"{self._hash_key(key)}.json"
+        try:
+            with open(file_path, 'w') as f:
+                json.dump({
+                    'key': key,
+                    'value': value,
+                    'created_at': datetime.now().isoformat(),
+                    'expires_at': expires_at.isoformat()
+                }, f)
+        except Exception as e:
+            logger.warning(f"Cache write error for {key}: {e}")
     
-    async def delete(self, prefix: str, *args):
-        """Delete value from cache."""
-        key = self._make_key(prefix, *args)
-        self.l1_cache.delete(key)
+    async def invalidate(self, key: str):
+        """Invalidate cache entry."""
+        if key in self.memory_cache:
+            del self.memory_cache[key]
+            del self.memory_ttl[key]
         
-        if self.use_redis and self._connected:
-            await self.l2_cache.delete(key)
+        file_path = self.cache_dir / f"{self._hash_key(key)}.json"
+        if file_path.exists():
+            file_path.unlink()
     
-    async def clear_prefix(self, prefix: str):
-        """Clear all keys with prefix."""
-        # Clear L1
-        keys_to_delete = [
-            k for k in self.l1_cache._cache.keys()
-            if k.startswith(prefix)
-        ]
-        for key in keys_to_delete:
-            self.l1_cache.delete(key)
+    async def clear(self):
+        """Clear all cache."""
+        self.memory_cache.clear()
+        self.memory_ttl.clear()
         
-        # Clear L2
-        if self.use_redis and self._connected:
-            await self.l2_cache.clear_pattern(f"{prefix}*")
+        for file in self.cache_dir.glob("*.json"):
+            file.unlink()
     
-    # Convenience methods for common cache operations
-    
-    async def get_search(self, query: str, filters: Dict = None) -> Optional[List]:
-        """Get cached search results."""
-        filters_key = json.dumps(filters, sort_keys=True) if filters else ""
-        return await self.get(CacheConfig.PREFIX_SEARCH, query, filters_key)
-    
-    async def set_search(self, query: str, results: List, filters: Dict = None):
-        """Cache search results."""
-        filters_key = json.dumps(filters, sort_keys=True) if filters else ""
-        await self.set(
-            CacheConfig.PREFIX_SEARCH,
-            results,
-            CacheConfig.TTL_SEARCH_RESULTS,
-            query,
-            filters_key
-        )
-    
-    async def get_trending(self, language: str = None, since: str = "daily") -> Optional[List]:
-        """Get cached trending repos."""
-        return await self.get(CacheConfig.PREFIX_TRENDING, language or "all", since)
-    
-    async def set_trending(self, repos: List, language: str = None, since: str = "daily"):
-        """Cache trending repos."""
-        await self.set(
-            CacheConfig.PREFIX_TRENDING,
-            repos,
-            CacheConfig.TTL_TRENDING,
-            language or "all",
-            since
-        )
-    
-    async def get_repo(self, repo_id: int) -> Optional[Dict]:
-        """Get cached repo details."""
-        return await self.get(CacheConfig.PREFIX_REPO, repo_id)
-    
-    async def set_repo(self, repo_id: int, data: Dict):
-        """Cache repo details."""
-        await self.set(
-            CacheConfig.PREFIX_REPO,
-            data,
-            CacheConfig.TTL_REPO_DETAILS,
-            repo_id
-        )
-    
-    async def stats(self) -> Dict:
-        """Get cache statistics."""
-        return {
-            "l1": self.l1_cache.stats(),
-            "l2": await self.l2_cache.stats() if self._connected else {"available": False}
-        }
+    def _hash_key(self, key: str) -> str:
+        """Hash cache key for file storage."""
+        return hashlib.md5(key.encode()).hexdigest()
 
 
-# Global cache manager instance
-_cache_manager: Optional[CacheManager] = None
+# Global cache instance
+cache_manager: Optional[CacheManager] = None
 
 
-def get_cache_manager() -> CacheManager:
-    """Get or create cache manager."""
-    global _cache_manager
-    
-    if _cache_manager is None:
-        import os
-        use_redis = os.getenv("USE_REDIS", "false").lower() == "true"
-        _cache_manager = CacheManager(use_redis=use_redis)
-    
-    return _cache_manager
+async def init_cache(cache_dir: str = "./cache", default_ttl: int = 3600):
+    """Initialize global cache manager."""
+    global cache_manager
+    cache_manager = CacheManager(cache_dir, default_ttl)
+    logger.info(f"Cache initialized: {cache_dir}")
 
 
-async def init_cache():
-    """Initialize cache system."""
-    cache = get_cache_manager()
-    await cache.connect()
-    logger.info("✅ Cache system initialized")
-    return cache
-
-
-async def shutdown_cache():
-    """Shutdown cache system."""
-    cache = get_cache_manager()
-    await cache.disconnect()
-    logger.info("👋 Cache system shutdown")
-
-
-# Cache decorator for async functions
-def cached(prefix: str, ttl: int = None):
-    """Decorator to cache function results."""
-    def decorator(func):
-        async def wrapper(*args, **kwargs):
-            cache = get_cache_manager()
-            
-            # Generate cache key
-            key_args = args[1:] if args and hasattr(args[0], '__class__') else args
-            cache_key = f"{prefix}:{func.__name__}:{hash(str(key_args) + str(kwargs))}"
-            
-            # Try cache
-            cached_result = await cache.get(prefix, cache_key)
-            if cached_result is not None:
-                return cached_result
-            
-            # Call function
-            result = await func(*args, **kwargs)
-            
-            # Cache result
-            await cache.set(prefix, result, ttl, cache_key)
-            
-            return result
-        return wrapper
-    return decorator
+async def get_cache() -> CacheManager:
+    """Get global cache manager."""
+    global cache_manager
+    if cache_manager is None:
+        await init_cache()
+    return cache_manager
